@@ -129,6 +129,19 @@ If network drops:
 
 This is essential for real emergencies.
 
+### Backend - Node.js (Fast + Real-time)
+
+#### Backend Philosophy
+
+The backend is a state machine, not a CRUD server.
+
+It:
+
+- Validates transitions
+- Enforces rules
+- Guarantees order
+- Logs everything
+
 ```
 +-------------------------------+
 |  Android App (Flutter)        |
