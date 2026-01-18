@@ -3,6 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_theme.dart';
 import '../core/constants/app_constants.dart';
 import '../core/providers/location_provider.dart';
+import '../core/services/foreground_service.dart';
+import '../core/services/location_stream_service.dart';
+import '../services/sos_service.dart';
+import '../widgets/sos_button.dart';
+import '../models/sos_alert.dart';
 
 /// Home screen with location display and SOS button
 class HomeScreen extends ConsumerStatefulWidget {
@@ -13,10 +18,115 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  final HTTPSOSService _sosService = HTTPSOSService();
+  final LocationStreamService _locationStreamService = LocationStreamService();
+  final ForegroundService _foregroundService = ForegroundService();
+  String _sosState = AppConstants.sosLocked;
+  bool _isTriggering = false;
+
   @override
   void initState() {
     super.initState();
-    // Location is now handled by LocationStateNotifier
+    ref.listen<AsyncValue<String?>>(locationStateProvider, (previous, next) {
+      final district = next.valueOrNull;
+      if (_sosState != AppConstants.sosActive) {
+        setState(() {
+          _sosState = district == null ? AppConstants.sosLocked : AppConstants.sosReady;
+        });
+      }
+    });
+  }
+
+  Future<void> _handleSosStateChange(String state) async {
+    if (state == AppConstants.sosActive) {
+      await _triggerSos();
+    } else {
+      setState(() {
+        _sosState = state;
+      });
+    }
+  }
+
+  Future<void> _triggerSos() async {
+    if (_isTriggering) {
+      return;
+    }
+    setState(() {
+      _isTriggering = true;
+    });
+
+    final locationService = ref.read(locationServiceProvider);
+    final location = await locationService.getCurrentLocation();
+    if (location == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Location unavailable')),
+        );
+      }
+      setState(() {
+        _isTriggering = false;
+        _sosState = AppConstants.sosReady;
+      });
+      return;
+    }
+
+    final district = await locationService.getDistrictFromCoordinates(
+      location.latitude,
+      location.longitude,
+    );
+
+    final alert = SOSAlert(
+      senderAlias: 'device',
+      senderMobile: 'unknown',
+      district: district ?? 'unknown',
+      message: 'SOS activated',
+      latitude: location.latitude,
+      longitude: location.longitude,
+      timestamp: DateTime.now(),
+    );
+
+    final success = await _sosService.sendSOSAlert(alert);
+    if (success) {
+      await _foregroundService.start();
+      final sosId = _sosService.activeSosId;
+      if (sosId != null) {
+        await _locationStreamService.start(sosId: sosId);
+      }
+      await _sosService.flushQueuedLocations();
+      setState(() {
+        _sosState = AppConstants.sosActive;
+        _isTriggering = false;
+      });
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to trigger SOS')),
+        );
+      }
+      setState(() {
+        _sosState = AppConstants.sosReady;
+        _isTriggering = false;
+      });
+    }
+  }
+
+  Future<void> _resolveSos() async {
+    final sosId = _sosService.activeSosId;
+    if (sosId == null) {
+      return;
+    }
+    final success = await _sosService.stopSOSAlert(sosId);
+    if (success) {
+      await _locationStreamService.stop();
+      await _foregroundService.stop();
+      setState(() {
+        _sosState = AppConstants.sosReady;
+      });
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to resolve SOS')),
+      );
+    }
   }
 
   @override
@@ -216,56 +326,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               
               const SizedBox(height: 24),
               
-              // SOS Button
-              Container(
-                width: 200,
-                height: 200,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppTheme.accentRed,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppTheme.accentRed.withValues(alpha: 0.3),
-                      blurRadius: 20,
-                      spreadRadius: 5,
-                    ),
-                  ],
-                ),
-                child: InkWell(
-                  onTap: () {
-                    // TODO: Handle SOS activation
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('SOS activated!'),
-                        backgroundColor: AppTheme.accentRed,
-                      ),
-                    );
-                  },
-                  child: const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'SOS',
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.pureWhite,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          'Hold for emergency',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppTheme.pureWhite,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              SOSButton(
+                state: _sosState,
+                onStateChanged: _handleSosStateChange,
               ),
+
+              if (_sosState == AppConstants.sosActive) ...[
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: _resolveSos,
+                  child: const Text('Resolve SOS'),
+                ),
+              ],
               
               const SizedBox(height: 40),
               

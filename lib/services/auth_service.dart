@@ -1,53 +1,96 @@
-/// Abstract authentication service interface
-/// This allows easy switching between Firebase Auth, Google Sign-In, etc.
-abstract class AuthService {
-  /// Initialize the authentication service
-  Future<void> initialize();
-  
-  /// Get current user ID (Firebase UID or custom identifier)
-  String? get currentUserId;
-  
-  /// Check if user is authenticated
-  bool get isAuthenticated;
-  
-  /// Sign in anonymously (for MVP)
-  Future<String?> signInAnonymously();
-  
-  /// Sign out current user
-  Future<void> signOut();
-  
-  /// Stream of authentication state changes
-  Stream<String?> get authStateChanges;
+import '../core/api/api_client.dart';
+import '../core/constants/app_constants.dart';
+import '../core/storage/secure_storage.dart';
+
+class AuthSession {
+  final String token;
+  final String deviceId;
+  final String expiresIn;
+
+  const AuthSession({
+    required this.token,
+    required this.deviceId,
+    required this.expiresIn,
+  });
 }
 
-/// Firebase implementation of AuthService
-class FirebaseAuthService implements AuthService {
-  // TODO: Implement Firebase Auth logic
-  
-  @override
-  Future<void> initialize() async {
-    // Initialize Firebase Auth
-    throw UnimplementedError('Firebase Auth implementation pending');
+class DeviceAuthService {
+  DeviceAuthService({
+    ApiClient? apiClient,
+    SecureStorage? storage,
+  })  : _storage = storage ?? SecureStorage(),
+        _apiClient = apiClient ??
+            ApiClient(
+              baseUrl: AppConstants.baseUrl,
+              storage: storage ?? SecureStorage(),
+            );
+
+  final SecureStorage _storage;
+  final ApiClient _apiClient;
+
+  Future<AuthSession> registerDevice({
+    String? name,
+    String? phone,
+    String? fcmToken,
+  }) async {
+    final response = await _apiClient.postJson(
+      '/device/register',
+      authenticated: false,
+      body: {
+        if (name != null) 'name': name,
+        if (phone != null) 'phone': phone,
+        if (fcmToken != null) 'fcmToken': fcmToken,
+      },
+    );
+
+    final token = response['token'] as String?;
+    final device = response['device'] as Map<String, dynamic>?;
+    final deviceId = device?['id'] as String?;
+    final expiresIn = response['expiresIn']?.toString() ?? '';
+
+    if (token == null || deviceId == null) {
+      throw ApiException(
+        statusCode: 500,
+        message: 'Invalid registration response',
+        data: response,
+      );
+    }
+
+    await _storage.setToken(token);
+    await _storage.setDeviceId(deviceId);
+
+    return AuthSession(
+      token: token,
+      deviceId: deviceId,
+      expiresIn: expiresIn,
+    );
   }
 
-  @override
-  String? get currentUserId => null;
-
-  @override
-  bool get isAuthenticated => false;
-
-  @override
-  Future<String?> signInAnonymously() async {
-    throw UnimplementedError('Anonymous sign-in implementation pending');
+  Future<Map<String, dynamic>> getProfile() async {
+    final response = await _apiClient.getJson('/device/profile');
+    return response['device'] as Map<String, dynamic>? ?? {};
   }
 
-  @override
-  Future<void> signOut() async {
-    throw UnimplementedError('Sign out implementation pending');
+  Future<Map<String, dynamic>> updateProfile({
+    String? name,
+    String? phone,
+    String? fcmToken,
+  }) async {
+    final response = await _apiClient.putJson(
+      '/device/profile',
+      body: {
+        if (name != null) 'name': name,
+        if (phone != null) 'phone': phone,
+        if (fcmToken != null) 'fcmToken': fcmToken,
+      },
+    );
+
+    return response['device'] as Map<String, dynamic>? ?? {};
   }
 
-  @override
-  Stream<String?> get authStateChanges {
-    throw UnimplementedError('Auth state changes stream pending');
-  }
+  Future<String?> getToken() async => _storage.getToken();
+
+  Future<String?> getDeviceId() async => _storage.getDeviceId();
+
+  Future<void> clearSession() async => _storage.clear();
 }

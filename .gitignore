@@ -107,3 +107,7 @@ test/coverage/
 
 # Documentation
 docs/_build/
+
+# Node.js
+node_modules/
+npm-debug.log*

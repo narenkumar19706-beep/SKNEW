@@ -20,8 +20,7 @@ class AppConstants {
   static const String alertsTableName = 'alerts';
   
   // API Endpoints (Backend)
-  static const String baseUrl = 'http://localhost:8080';
-  static const String sosEndpoint = '/api/sos';
+  static const String baseUrl = 'http://10.0.2.2:3000';
   
   // Location Settings
   static const double locationAccuracy = 100.0; // meters
