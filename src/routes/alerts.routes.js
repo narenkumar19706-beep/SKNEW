@@ -1,9 +1,9 @@
 const express = require('express');
+const { getDistrictAlerts } = require('../controllers/alerts.controller');
+const { authenticateDevice } = require('../middlewares/auth.middleware');
 
 const router = express.Router();
 
-router.get('/district', (req, res) => {
-  res.status(501).json({ error: 'Not implemented' });
-});
+router.get('/district', authenticateDevice, getDistrictAlerts);
 
 module.exports = router;

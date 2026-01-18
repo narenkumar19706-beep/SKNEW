@@ -1,17 +1,11 @@
 const express = require('express');
+const { triggerSos, addUpdate, resolveActiveSos } = require('../controllers/sos.controller');
+const { authenticateDevice } = require('../middlewares/auth.middleware');
 
 const router = express.Router();
 
-router.post('/trigger', (req, res) => {
-  res.status(501).json({ error: 'Not implemented' });
-});
-
-router.post('/update', (req, res) => {
-  res.status(501).json({ error: 'Not implemented' });
-});
-
-router.post('/resolve', (req, res) => {
-  res.status(501).json({ error: 'Not implemented' });
-});
+router.post('/trigger', authenticateDevice, triggerSos);
+router.post('/update', authenticateDevice, addUpdate);
+router.post('/resolve', authenticateDevice, resolveActiveSos);
 
 module.exports = router;

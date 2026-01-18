@@ -71,4 +71,5 @@ module.exports = {
   createDevice,
   getDeviceById,
   updateDeviceProfile,
+  ensureDevicesTable,
 };
