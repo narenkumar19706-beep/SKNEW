@@ -199,6 +199,18 @@ This service cannot be bypassed.
 - Enables future geo-fencing
 - Never done on client
 
+**Notification Service**
+
+Accepts semantic events:
+
+- SOS_CREATED
+- SOS_UPDATED
+- SOS_RESOLVED
+
+Converts them to FCM payloads.
+
+Handles retries and logging.
+
 ```
 +-------------------------------+
 |  Android App (Flutter)        |
