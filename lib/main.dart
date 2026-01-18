@@ -5,7 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_constants.dart';
 import 'core/services/fcm_service.dart';
-import 'screens/onboarding_screen.dart';
+import 'screens/rrt_profile_setup_screen_prod.dart' as profile;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +33,7 @@ class RRTApp extends StatelessWidget {
     return MaterialApp(
       title: AppConstants.appName,
       theme: AppTheme.lightTheme,
-      home: const OnboardingScreen(), // Start with onboarding
+      home: const profile.RRTProfileSetupScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

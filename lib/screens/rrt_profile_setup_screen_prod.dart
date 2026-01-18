@@ -38,6 +38,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'rrt_grant_location_screen_no_overflow.dart' as grant;
+
 void main() {
   runApp(const RRTApp());
 }
@@ -249,7 +251,7 @@ class _RRTProfileSetupScreenState extends State<RRTProfileSetupScreen> {
 
       // Navigate next
       Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const _NextScreenPlaceholder()),
+        MaterialPageRoute(builder: (_) => const grant.RRTGrantLocationScreen()),
       );
     } catch (_) {
       if (!mounted) return;
