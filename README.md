@@ -47,6 +47,27 @@ Needed for:
 
 The app never decides these.
 
+### Frontend - Flutter (Android-First)
+
+#### Frontend Role (Strictly Defined)
+
+The Flutter app is a controlled terminal, not a decision maker.
+
+It is responsible for:
+
+- Rendering screens
+- Capturing user intent
+- Requesting permissions
+- Capturing GPS
+- Showing backend state
+
+It is not responsible for:
+
+- Who receives alerts
+- When SOS is valid
+- How districts work
+- Any security decision
+
 ```
 +-------------------------------+
 |  Android App (Flutter)        |
