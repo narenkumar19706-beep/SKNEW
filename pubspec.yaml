@@ -46,6 +46,7 @@ dependencies:
   
   # Local Storage
   sqflite: ^2.4.0
+  shared_preferences: ^2.2.3
   
   # Local Notifications (for foreground FCM)
   flutter_local_notifications: ^18.0.1
