@@ -192,6 +192,13 @@ Enforces:
 
 This service cannot be bypassed.
 
+**District Resolution Service**
+
+- Converts lat/lng -> district
+- Ensures alerts remain local
+- Enables future geo-fencing
+- Never done on client
+
 ```
 +-------------------------------+
 |  Android App (Flutter)        |
