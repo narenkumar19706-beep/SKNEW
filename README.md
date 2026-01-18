@@ -2,6 +2,38 @@
 
 A new Flutter project.
 
+## Architecture
+
+```
++----------------------------------+
+|      Android App (Flutter)       |
+|                                  |
+| • SOS UI & Gestures              |
+| • Location & Foreground Service  |
+| • FCM Listener                   |
+| • Offline-safe queue             |
++------------------+---------------+
+                   |
+                   | HTTPS + WebSocket
+                   v
++----------------------------------+
+|        Backend (Node.js)         |
+|                                  |
+| • Device Identity (JWT)          |
+| • District Resolution Engine     |
+| • SOS Lifecycle State Machine    |
+| • Notification Orchestrator      |
+| • Realtime Location Relay        |
++------------------+---------------+
+                   |
+           +-------+--------+
+           |                |
++------------------+  +------------------+
+| PostgreSQL       |  | Firebase FCM     |
+| (Source Truth)   |  | (Notify only)    |
++------------------+  +------------------+
+```
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
