@@ -95,6 +95,28 @@ lib/
       └── bottom_nav.dart
 ```
 
+#### Android-Specific Implementation Choices
+
+**Foreground Service (Critical)**
+
+- Starts only during ACTIVE SOS
+- Keeps GPS alive
+- Shows persistent notification
+- Prevents OS kill
+
+**Location Strategy**
+
+- Accuracy: High
+- Interval: 5-10 seconds
+- Offline buffering enabled
+- Flush on reconnect
+
+**Permissions Strategy**
+
+- Asked only when needed
+- Explained before system dialog
+- No repeated nagging
+
 ```
 +-------------------------------+
 |  Android App (Flutter)        |
