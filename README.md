@@ -20,33 +20,35 @@ The RRT system is designed to:
 This leads to a state-driven backend + thin client architecture.
 
 ```
-+----------------------------------+
-|      Android App (Flutter)       |
-|                                  |
-| • SOS UI & Gestures              |
-| • Location & Foreground Service  |
-| • FCM Listener                   |
-| • Offline-safe queue             |
-+------------------+---------------+
-                   |
-                   | HTTPS + WebSocket
-                   v
-+----------------------------------+
-|        Backend (Node.js)         |
-|                                  |
-| • Device Identity (JWT)          |
-| • District Resolution Engine     |
-| • SOS Lifecycle State Machine    |
-| • Notification Orchestrator      |
-| • Realtime Location Relay        |
-+------------------+---------------+
-                   |
-           +-------+--------+
-           |                |
-+------------------+  +------------------+
-| PostgreSQL       |  | Firebase FCM     |
-| (Source Truth)   |  | (Notify only)    |
-+------------------+  +------------------+
++-------------------------------+
+|  Android App (Flutter)        |
+|                               |
+|  - UI & Gestures              |
+|  - Permissions                |
+|  - GPS capture                |
+|  - Foreground service         |
+|  - FCM listener               |
++---------------+---------------+
+                |
+                | HTTPS (state changes)
+                | WebSocket (live updates)
+                v
++-------------------------------+
+|  Backend (Node.js + Express)  |
+|                               |
+|  - Device identity            |
+|  - SOS state machine          |
+|  - District resolution        |
+|  - Notification orchestration |
+|  - Live location relay        |
++---------------+---------------+
+                |
+        +-------+--------+
+        |                |
++--------------+  +--------------+
+| PostgreSQL   |  | Firebase FCM |
+| (truth + log)|  | (notify only)|
++--------------+  +--------------+
 ```
 
 ## Getting Started
