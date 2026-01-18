@@ -68,6 +68,33 @@ It is not responsible for:
 - How districts work
 - Any security decision
 
+#### Suggested Flutter `lib/` layout
+
+```
+lib/
+ ├── main.dart
+ ├── app.dart
+ ├── core/
+ │    ├── api/
+ │    │    └── api_client.dart
+ │    ├── services/
+ │    │    ├── location_service.dart
+ │    │    ├── foreground_service.dart
+ │    │    ├── fcm_service.dart
+ │    │    └── socket_service.dart
+ │    ├── storage/
+ │    │    └── secure_storage.dart
+ │    └── constants/
+ ├── features/
+ │    ├── onboarding/
+ │    ├── profile/
+ │    ├── home/
+ │    ├── sos/
+ │    └── alerts/
+ └── navigation/
+      └── bottom_nav.dart
+```
+
 ```
 +-------------------------------+
 |  Android App (Flutter)        |
