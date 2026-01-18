@@ -171,6 +171,16 @@ src/
       └── auth.middleware.js
 ```
 
+#### Core Backend Services Explained
+
+**Device Service**
+
+- Registers device
+- Issues JWT
+- Manages profile
+- Binds FCM token
+- No phone verification is required
+
 ```
 +-------------------------------+
 |  Android App (Flutter)        |
