@@ -218,6 +218,21 @@ Handles retries and logging.
 - Throttles noise
 - Preserves history
 
+### Key Backend APIs (Minimum Production Set)
+
+#### Authentication Model
+
+- Device-bound JWT
+- Short TTL
+- Re-register allowed
+- No refresh token complexity
+
+Header:
+
+```
+Authorization: Bearer <jwt>
+```
+
 ```
 +-------------------------------+
 |  Android App (Flutter)        |
