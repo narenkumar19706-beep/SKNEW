@@ -19,6 +19,34 @@ The RRT system is designed to:
 
 This leads to a state-driven backend + thin client architecture.
 
+#### Key Architectural Decisions (Why this works)
+
+**PostgreSQL = Source of Truth**
+
+SOS is stateful, not event-only.
+
+Needed for:
+
+- Audit trails
+- Legal defensibility
+- Deterministic recovery
+
+**Firebase = Notifications Only**
+
+- No auth
+- No database
+- No logic
+- Just reliable delivery
+
+**Backend Owns All Logic**
+
+- District determination
+- Who gets notified
+- SOS lifecycle rules
+- Privacy enforcement
+
+The app never decides these.
+
 ```
 +-------------------------------+
 |  Android App (Flutter)        |
