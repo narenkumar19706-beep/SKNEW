@@ -233,6 +233,79 @@ Header:
 Authorization: Bearer <jwt>
 ```
 
+#### Device APIs
+
+**Register Device**
+
+POST /device/register
+
+Creates identity and issues JWT.
+
+**Get Profile**
+
+GET /device/profile
+
+**Update Profile**
+
+PUT /device/profile
+
+Editable:
+
+- Name
+- Phone
+
+Derived (read-only):
+
+- Address
+- District
+
+#### SOS APIs
+
+**Trigger SOS**
+
+POST /sos/trigger
+
+Backend:
+
+- Validates state
+- Resolves district
+- Creates SOS
+- Notifies responders
+
+**Add Update**
+
+POST /sos/update
+
+Only allowed if SOS is ACTIVE.
+
+**Resolve SOS**
+
+POST /sos/resolve
+
+Ends lifecycle and sends final notification.
+
+#### Location APIs
+
+**Update Location**
+
+POST /location/update
+
+**Live Location**
+
+GET /location/live/:sos_id
+
+#### Alerts API
+
+**District Alerts**
+
+GET /alerts/district
+
+Returns:
+
+- ACTIVE alerts only
+- Distance calculated server-side
+- Phone visible only during ACTIVE SOS
+
 ```
 +-------------------------------+
 |  Android App (Flutter)        |
