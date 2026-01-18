@@ -306,6 +306,30 @@ Returns:
 - Distance calculated server-side
 - Phone visible only during ACTIVE SOS
 
+### SOS Flow (End-to-End)
+
+#### User Journey
+
+App Launch
+  ↓
+Grant Location
+  ↓
+Profile Setup
+  ↓
+Home (Locked)
+  ↓ slide
+Home (Ready)
+  ↓ press & hold
+SOS ACTIVE
+  ↓
+Notifications sent
+  ↓
+Live tracking
+  ↓
+Add update (optional)
+  ↓
+Resolve SOS
+
 ```
 +-------------------------------+
 |  Android App (Flutter)        |
