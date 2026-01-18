@@ -181,6 +181,17 @@ src/
 - Binds FCM token
 - No phone verification is required
 
+**SOS Service (Heart of the System)**
+
+Enforces:
+
+- One active SOS per device
+- Valid state transitions only
+- Controlled resolution
+- Notification triggers
+
+This service cannot be bypassed.
+
 ```
 +-------------------------------+
 |  Android App (Flutter)        |
