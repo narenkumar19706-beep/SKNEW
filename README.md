@@ -142,6 +142,35 @@ It:
 - Guarantees order
 - Logs everything
 
+#### Suggested Node.js `src/` layout
+
+```
+src/
+ ├── server.js
+ ├── app.js
+ ├── config/
+ │    ├── db.js
+ │    ├── fcm.js
+ │    └── env.js
+ ├── routes/
+ │    ├── device.routes.js
+ │    ├── sos.routes.js
+ │    ├── alerts.routes.js
+ │    └── location.routes.js
+ ├── controllers/
+ │    ├── device.controller.js
+ │    ├── sos.controller.js
+ │    ├── alerts.controller.js
+ │    └── location.controller.js
+ ├── services/
+ │    ├── sos.service.js
+ │    ├── district.service.js
+ │    ├── fcm.service.js
+ │    └── socket.service.js
+ └── middlewares/
+      └── auth.middleware.js
+```
+
 ```
 +-------------------------------+
 |  Android App (Flutter)        |
