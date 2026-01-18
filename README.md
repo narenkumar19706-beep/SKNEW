@@ -211,6 +211,13 @@ Converts them to FCM payloads.
 
 Handles retries and logging.
 
+**Location Stream Service**
+
+- Stores GPS trail
+- Emits live updates via WebSocket
+- Throttles noise
+- Preserves history
+
 ```
 +-------------------------------+
 |  Android App (Flutter)        |
