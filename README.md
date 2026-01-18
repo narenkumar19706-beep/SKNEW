@@ -4,6 +4,21 @@ A new Flutter project.
 
 ## Architecture
 
+### Overall Architecture (Clean & Scalable)
+
+#### Architectural Intent
+
+The RRT system is designed to:
+
+- Work without login / OTP
+- Be fast under stress
+- Prevent false or accidental SOS
+- Preserve privacy by default
+- Scale district -> city -> state without rewrite
+- Remain auditable (important for public-interest systems)
+
+This leads to a state-driven backend + thin client architecture.
+
 ```
 +----------------------------------+
 |      Android App (Flutter)       |
