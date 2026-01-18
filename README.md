@@ -330,6 +330,39 @@ Add update (optional)
   ↓
 Resolve SOS
 
+#### System Flow (What actually happens)
+
+User presses and holds SOS.
+
+App sends trigger request.
+
+Backend:
+
+- Validates
+- Resolves district
+- Creates SOS
+
+FCM sent to district users.
+
+Foreground service starts.
+
+Location updates stream.
+
+Responders view alert.
+
+User resolves SOS.
+
+Backend closes lifecycle.
+
+Final notification sent.
+
+#### Privacy Guarantees
+
+- No tracking before SOS
+- No tracking after resolution
+- Phone visible only while ACTIVE
+- Location scoped to district
+
 ```
 +-------------------------------+
 |  Android App (Flutter)        |
