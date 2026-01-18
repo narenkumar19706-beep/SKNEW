@@ -1,12 +1,8 @@
-# rrt_flutter_app
+# RRT Platform Architecture
 
-A new Flutter project.
+## 1. Overall Architecture (Clean and Scalable)
 
-## Architecture
-
-### Overall Architecture (Clean & Scalable)
-
-#### Architectural Intent
+### 1.1 Architectural Intent
 
 The RRT system is designed to:
 
@@ -17,9 +13,43 @@ The RRT system is designed to:
 - Scale district -> city -> state without rewrite
 - Remain auditable (important for public-interest systems)
 
-This leads to a state-driven backend + thin client architecture.
+This leads to a state-driven backend and thin client architecture.
 
-#### Key Architectural Decisions (Why this works)
+### 1.2 High-Level Diagram
+
+```
++-------------------------------+
+|  Android App (Flutter)        |
+|                               |
+|  - UI and Gestures            |
+|  - Permissions                |
+|  - GPS capture                |
+|  - Foreground service         |
+|  - FCM listener               |
++---------------+---------------+
+                |
+                | HTTPS (state changes)
+                | WebSocket (live updates)
+                v
++-------------------------------+
+|  Backend (Node.js + Express)  |
+|                               |
+|  - Device identity            |
+|  - SOS state machine          |
+|  - District resolution        |
+|  - Notification orchestration |
+|  - Live location relay        |
++---------------+---------------+
+                |
+        +-------+--------+
+        |                |
++--------------+  +--------------+
+| PostgreSQL   |  | Firebase FCM |
+| (truth + log)|  | (notify only)|
++--------------+  +--------------+
+```
+
+### 1.3 Key Architectural Decisions (Why this works)
 
 **PostgreSQL = Source of Truth**
 
@@ -47,9 +77,9 @@ Needed for:
 
 The app never decides these.
 
-### Frontend - Flutter (Android-First)
+## 2. Frontend - Flutter (Android-First)
 
-#### Frontend Role (Strictly Defined)
+### 2.1 Frontend Role (Strictly Defined)
 
 The Flutter app is a controlled terminal, not a decision maker.
 
@@ -68,7 +98,7 @@ It is not responsible for:
 - How districts work
 - Any security decision
 
-#### Suggested Flutter `lib/` layout
+### 2.2 Suggested Flutter `lib/` layout
 
 ```
 lib/
@@ -95,7 +125,7 @@ lib/
       └── bottom_nav.dart
 ```
 
-#### Android-Specific Implementation Choices
+### 2.3 Android-Specific Implementation Choices
 
 **Foreground Service (Critical)**
 
@@ -117,7 +147,7 @@ lib/
 - Explained before system dialog
 - No repeated nagging
 
-#### Offline & Failure Behavior
+### 2.4 Offline and Failure Behavior
 
 SOS never stops silently.
 
@@ -129,9 +159,9 @@ If network drops:
 
 This is essential for real emergencies.
 
-### Backend - Node.js (Fast + Real-time)
+## 3. Backend - Node.js (Fast and Real-time)
 
-#### Backend Philosophy
+### 3.1 Backend Philosophy
 
 The backend is a state machine, not a CRUD server.
 
@@ -142,7 +172,7 @@ It:
 - Guarantees order
 - Logs everything
 
-#### Suggested Node.js `src/` layout
+### 3.2 Suggested Node.js `src/` layout
 
 ```
 src/
@@ -171,7 +201,7 @@ src/
       └── auth.middleware.js
 ```
 
-#### Core Backend Services Explained
+### 3.3 Core Backend Services Explained
 
 **Device Service**
 
@@ -218,9 +248,9 @@ Handles retries and logging.
 - Throttles noise
 - Preserves history
 
-### Key Backend APIs (Minimum Production Set)
+## 4. Key Backend APIs (Minimum Production Set)
 
-#### Authentication Model
+### 4.1 Authentication Model
 
 - Device-bound JWT
 - Short TTL
@@ -233,7 +263,7 @@ Header:
 Authorization: Bearer <jwt>
 ```
 
-#### Device APIs
+### 4.2 Device APIs
 
 **Register Device**
 
@@ -259,7 +289,7 @@ Derived (read-only):
 - Address
 - District
 
-#### SOS APIs
+### 4.3 SOS APIs
 
 **Trigger SOS**
 
@@ -284,7 +314,7 @@ POST /sos/resolve
 
 Ends lifecycle and sends final notification.
 
-#### Location APIs
+### 4.4 Location APIs
 
 **Update Location**
 
@@ -294,7 +324,7 @@ POST /location/update
 
 GET /location/live/:sos_id
 
-#### Alerts API
+### 4.5 Alerts API
 
 **District Alerts**
 
@@ -306,104 +336,28 @@ Returns:
 - Distance calculated server-side
 - Phone visible only during ACTIVE SOS
 
-### SOS Flow (End-to-End)
+## 5. SOS Flow (End-to-End)
 
-#### User Journey
+### 5.1 User Journey
 
-App Launch
-  ↓
-Grant Location
-  ↓
-Profile Setup
-  ↓
-Home (Locked)
-  ↓ slide
-Home (Ready)
-  ↓ press & hold
-SOS ACTIVE
-  ↓
-Notifications sent
-  ↓
-Live tracking
-  ↓
-Add update (optional)
-  ↓
-Resolve SOS
+App Launch -> Grant Location -> Profile Setup -> Home (Locked) -> slide -> Home (Ready) -> press and hold -> SOS ACTIVE -> Notifications sent -> Live tracking -> Add update (optional) -> Resolve SOS
 
-#### System Flow (What actually happens)
+### 5.2 System Flow (What actually happens)
 
-User presses and holds SOS.
+- User presses and holds SOS
+- App sends trigger request
+- Backend validates, resolves district, and creates SOS
+- FCM sent to district users
+- Foreground service starts
+- Location updates stream
+- Responders view alert
+- User resolves SOS
+- Backend closes lifecycle
+- Final notification sent
 
-App sends trigger request.
-
-Backend:
-
-- Validates
-- Resolves district
-- Creates SOS
-
-FCM sent to district users.
-
-Foreground service starts.
-
-Location updates stream.
-
-Responders view alert.
-
-User resolves SOS.
-
-Backend closes lifecycle.
-
-Final notification sent.
-
-#### Privacy Guarantees
+### 5.3 Privacy Guarantees
 
 - No tracking before SOS
 - No tracking after resolution
 - Phone visible only while ACTIVE
 - Location scoped to district
-
-```
-+-------------------------------+
-|  Android App (Flutter)        |
-|                               |
-|  - UI & Gestures              |
-|  - Permissions                |
-|  - GPS capture                |
-|  - Foreground service         |
-|  - FCM listener               |
-+---------------+---------------+
-                |
-                | HTTPS (state changes)
-                | WebSocket (live updates)
-                v
-+-------------------------------+
-|  Backend (Node.js + Express)  |
-|                               |
-|  - Device identity            |
-|  - SOS state machine          |
-|  - District resolution        |
-|  - Notification orchestration |
-|  - Live location relay        |
-+---------------+---------------+
-                |
-        +-------+--------+
-        |                |
-+--------------+  +--------------+
-| PostgreSQL   |  | Firebase FCM |
-| (truth + log)|  | (notify only)|
-+--------------+  +--------------+
-```
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
