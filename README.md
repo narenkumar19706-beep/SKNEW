@@ -117,6 +117,18 @@ lib/
 - Explained before system dialog
 - No repeated nagging
 
+#### Offline & Failure Behavior
+
+SOS never stops silently.
+
+If network drops:
+
+- GPS continues
+- Data queued locally
+- Backend reconciles later
+
+This is essential for real emergencies.
+
 ```
 +-------------------------------+
 |  Android App (Flutter)        |
